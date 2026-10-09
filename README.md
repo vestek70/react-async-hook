@@ -1,24 +1,24 @@
 # react-async-hook
 
-A tiny, **zero-dependency** React hook for async tasks (only React as a peer dependency).
-Race-condition safe, abortable, retryable.
+Um pequeno hook React **sem dependências externas** para tarefas assíncronas (apenas React como peer dependency).
+Seguro contra condições de corrida, com suporte a cancelamento e nova tentativa.
 
-I built it after noticing that the first, "working" version an AI assistant gave me
-handled only the happy path. This repo is the version I would actually ship.
+Criei este hook depois de perceber que a primeira versão "funcional" que um assistente de IA me forneceu
+tratava apenas o cenário ideal. Este repositório contém a versão que eu realmente usaria em produção.
 
-## Why
+## Por quê
 
-A naive `useFetch` breaks in production in quiet ways:
+Um `useFetch` ingênuo pode falhar em produção de formas pouco óbvias:
 
-| Problem | What happens |
+| Problema | O que acontece |
 |---|---|
-| No error state | The UI hangs on an empty screen |
-| No cancellation | `setState` after unmount, wasted requests |
-| Race condition | A slow response for an old param overwrites a newer one |
-| No retry | Every network blip is a dead end |
-| Hard-wired to `fetch` | Hard to reuse and hard to test |
+| Sem estado de erro | A interface pode ficar presa em uma tela vazia |
+| Sem cancelamento | `setState` após unmount e requisições desperdiçadas |
+| Condição de corrida | Uma resposta lenta de um parâmetro antigo sobrescreve uma resposta mais recente |
+| Sem nova tentativa | Qualquer falha temporária de rede vira um beco sem saída |
+| Acoplado ao `fetch` | Fica difícil reutilizar e testar |
 
-## Usage
+## Uso
 
 ```ts
 import { useAsync } from "./src/useAsync";
@@ -33,18 +33,18 @@ const { data, status, error, retry } = useAsync(
 );
 ```
 
-## Design decisions
+## Decisões de design
 
-- **Task injection.** The hook does not know about `fetch`, auth or base URLs.
-  You pass a function, so it works with anything and is testable without global mocks.
-- **Discriminated union state.** `success` always has `data`; `error` always has an `Error`.
-  Impossible states are unrepresentable.
-- **`AbortController`.** One mechanism solves cancellation, unmount safety and
-  the race condition: stale results are dropped if their signal was aborted.
-- **`taskRef`.** Callers do not need to wrap the task in `useCallback`.
-- **Data preserved on reload/error.** No flicker back to an empty state.
+- **Injeção da tarefa.** O hook não sabe nada sobre `fetch`, autenticação ou URLs base.
+  Você fornece uma função, então ele funciona com qualquer tarefa assíncrona e pode ser testado sem mocks globais.
+- **Estado com union discriminada.** `success` sempre possui `data`; `error` sempre possui um `Error`.
+  Estados impossíveis não podem ser representados.
+- **`AbortController`.** Um único mecanismo resolve cancelamento, segurança no unmount e
+  condições de corrida: resultados obsoletos são ignorados quando o sinal correspondente já foi abortado.
+- **`taskRef`.** Quem usa o hook não precisa envolver a tarefa em `useCallback`.
+- **Dados preservados ao recarregar ou em caso de erro.** Evita que a interface volte temporariamente para um estado vazio.
 
-## Tests
+## Testes
 
 ```bash
 npm install
@@ -52,9 +52,9 @@ npm test
 npm run typecheck
 ```
 
-Tests (Vitest + Testing Library) cover success, failure, non-Error rejections,
-the race condition, abort on unmount, abort on deps change, data retention and retry.
+Os testes (Vitest + Testing Library) cobrem sucesso, falha, rejeições que não são instâncias de `Error`,
+condição de corrida, cancelamento no unmount, cancelamento ao alterar dependências, preservação de dados e nova tentativa.
 
-## License
+## Licença
 
 MIT
